@@ -1,51 +1,50 @@
-import { Component } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact } from '../ContactsInitialSlice';
+import { getContacts } from '../ContactsSelectors';
 import css from './ContactForm.module.css';
 
-export class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-  };
-  change = evt => {
-    const { name, value } = evt.target;
-    this.setState({ [name]: value });
-  };
-  submit = evt => {
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
+
+   const submit = evt => {
     evt.preventDefault();
-    const { name, number } = this.state;
-    this.props.onSubmit(name, number);
-    this.setState({
-      name: '',
-      number: '',
-    });
+    const nameVal = evt.target.name.value;
+    const numberVal = evt.target.number.value;
+    if (nameVal) {
+      const searchContact = contacts.find(
+        ({ name }) => name.toLowerCase() === nameVal.toLowerCase()
+      );
+      if (searchContact) {
+        alert(`${nameVal} is already in contacts`);
+        return;
+      }
+    }
+    dispatch(addContact(nameVal, numberVal));
+    evt.target.reset();
   };
-  render() {
-    const { name, number } = this.state;
-    return (
-      <form className={css.form} onSubmit={this.submit}>
-        <h1 className={css.formTitle}>Phonebook</h1>
-        <span className={css.formName}>Name</span>
-        <input
-          className={css.nameInput}
-          type="text"
-          name="name"
-          title="Input Name"
-          required
-          onChange={this.change}
-          value={name}
-        />
-        <span className={css.formName}>Number</span>
-        <input
-          className={css.numberInput}
-          type="tel"
-          name="number"
-          title="Input Number"
-          required
-          onChange={this.change}
-          value={number}
-        />
-        <button className={css.buttonAdd} type="submit">Add contact</button>
-      </form>
-    );
-  }
-}
+
+  return (
+    <form className={css.form} onSubmit={submit}>
+      <h1 className={css.formTitle}>Phonebook</h1>
+      <span className={css.formName}>Name</span>
+      <input
+        className={css.nameInput}
+        type="text"
+        name="name"
+        title="Input Name"
+      />
+      <span className={css.formName}>Number</span>
+      <input
+        className={css.numberInput}
+        type="tel"
+        name="number"
+        title="Input Number"       
+      />
+      <button className={css.buttonAdd} type="submit">
+        Add contact
+      </button>
+    </form>
+  );
+};
+export default ContactForm;
